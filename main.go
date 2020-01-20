@@ -109,9 +109,8 @@ func main() {
 				},
 				transition : func () {
 					fmt.Println("[Normal] -> [Fizz]")
-				}});
+				}},
 	// Describing connection from normal state to buzz state
-	normal_state.connected   = append(normal_state.connected, 
 		connection{ connection_state : &buzz_state,
 			reason_to_move : func () bool { 
 					if (counter % 5 == 0) {
@@ -121,10 +120,8 @@ func main() {
 				},
 				transition : func () {
 					fmt.Println("[Normal] -> [Buzz]")
-				}});
-
+				}},
 	// Describing connection from normal state to normal state
-	normal_state.connected   = append(normal_state.connected, 
 		connection{ connection_state : &normal_state,
 			reason_to_move : func () bool { return true },
 			    transition : func () {
@@ -142,9 +139,8 @@ func main() {
 			},
 			transition : func () {
 				fmt.Println("[Fizz] -> [Buzz]")
-			}});
+			}},
 	// Describing connection from fizz to normal
-	fizz_state.connected = append(fizz_state.connected,
 		connection{ connection_state : &normal_state,
 			reason_to_move : func () bool { 
 				return true
