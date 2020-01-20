@@ -52,8 +52,6 @@ func (s state) state_function () *state {
 	var out_state *state;
 	s.core_function()
 	for alive {
-		fmt.Println("Counter = ", counter)
-		time.Sleep(500 * time.Millisecond)
 		for _, connected_state := range s.connected {
 			if (connected_state.reason_to_move() == true) { 
 				connected_state.transition()
@@ -74,7 +72,10 @@ func runtime( s state ) {
 	}
 }
 
-
+func step() {
+	fmt.Println("Counter = ", counter)
+	time.Sleep(500 * time.Millisecond)
+}
 
 func main() {
 	fmt.Println("Welcome to state machine")
@@ -82,19 +83,21 @@ func main() {
 	var normal_state state
 	normal_state.name = "Normal"
 	normal_state.core_function = func() {
-		fmt.Println(".")
+		step()
 		counter++
 	}
 	
 	var fizz_state  state
 	fizz_state.name = "Fizz"
 	fizz_state.core_function = func() {
+		step()
 		fmt.Println(" == FIZZ == ")
 	}
 
 	var buzz_state  state
 	buzz_state.name = "Buzz"
 	buzz_state.core_function = func() {
+		step()
 		fmt.Println(" == BUZZ == ")
 	}
 
