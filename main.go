@@ -47,8 +47,9 @@ func (s state) get_reason_for( to *state) func() bool {
 	}
 }
 
-func (s state) state_function () {
+func (s state) state_function () *state {
 	var alive = true
+	var out_state *state;
 	s.core_function()
 	for alive {
 		fmt.Println("Counter = ", counter)
@@ -56,12 +57,21 @@ func (s state) state_function () {
 		for _, connected_state := range s.connected {
 			if (connected_state.reason_to_move() == true) { 
 				connected_state.transition()
-				connected_state.connection_state.state_function()
+				out_state = connected_state.connection_state
 				alive = false
+				break
 			}
 		}
 	}
+	return out_state
 	
+}
+
+func runtime( s state ) {
+	var alive = true;
+	for alive {
+		s = *s.state_function();
+	}
 }
 
 
@@ -155,5 +165,5 @@ func main() {
 			}});
 
 
-	normal_state.state_function()
+	runtime(normal_state)
 }
