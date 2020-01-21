@@ -47,8 +47,9 @@ func (s state) get_reason_for( to *state) func() bool {
 	}
 }
 
-func (s state) state_function () {
+func (s state) state_function () *state {
 	var alive = true
+	var next_state = &s
 	s.core_function()
 	for alive {
 		fmt.Println("Counter = ", counter)
@@ -56,14 +57,21 @@ func (s state) state_function () {
 		for _, connected_state := range s.connected {
 			if (connected_state.reason_to_move() == true) { 
 				connected_state.transition()
-				connected_state.connection_state.state_function()
+				next_state = connected_state.connection_state
 				alive = false
+				break
 			}
 		}
 	}
-	
+	return next_state;
 }
 
+func runtime(s *state) {
+	var alive = true 
+	for alive {
+		s = (*s).state_function()
+	}
+}
 
 
 func main() {
@@ -99,9 +107,8 @@ func main() {
 				},
 				transition : func () {
 					fmt.Println("[Normal] -> [Fizz]")
-				}});
+				}},
 	// Describing connection from normal state to buzz state
-	normal_state.connected   = append(normal_state.connected, 
 		connection{ connection_state : &buzz_state,
 			reason_to_move : func () bool { 
 					if (counter % 5 == 0) {
@@ -111,10 +118,8 @@ func main() {
 				},
 				transition : func () {
 					fmt.Println("[Normal] -> [Buzz]")
-				}});
-
+				}},
 	// Describing connection from normal state to normal state
-	normal_state.connected   = append(normal_state.connected, 
 		connection{ connection_state : &normal_state,
 			reason_to_move : func () bool { return true },
 			    transition : func () {
@@ -132,9 +137,8 @@ func main() {
 			},
 			transition : func () {
 				fmt.Println("[Fizz] -> [Buzz]")
-			}});
+			}},
 	// Describing connection from fizz to normal
-	fizz_state.connected = append(fizz_state.connected,
 		connection{ connection_state : &normal_state,
 			reason_to_move : func () bool { 
 				return true
@@ -155,5 +159,5 @@ func main() {
 			}});
 
 
-	normal_state.state_function()
+	runtime(&normal_state)
 }
