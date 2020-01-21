@@ -52,8 +52,6 @@ func (s state) state_function () *state {
 	var next_state = &s
 	s.core_function()
 	for alive {
-		fmt.Println("Counter = ", counter)
-		time.Sleep(500 * time.Millisecond)
 		for _, connected_state := range s.connected {
 			if (connected_state.reason_to_move() == true) { 
 				connected_state.transition()
@@ -69,6 +67,8 @@ func (s state) state_function () *state {
 func runtime(s *state) {
 	var alive = true 
 	for alive {
+		fmt.Println("Counter = ", counter)
+		time.Sleep(500 * time.Millisecond)
 		s = (*s).state_function()
 	}
 }
