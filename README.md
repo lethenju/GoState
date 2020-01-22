@@ -1,4 +1,4 @@
-# state_machine_framework
+# state_machine
 A simple framework for designing state machines in Go
 
 ## What is it ?
@@ -8,7 +8,4 @@ This project aim to answer your needs and provide an easy way to design your sta
 
 ## Cool ! How can I use it
 
-Ahem sorry to disappoint you, but the APIs are not perfectly fixed for now, and the example provided here have major issues that I plan on working.. 
-
-TL;DR : Dont use it for now
-
+I'm currently writing a guide, but for now you can simply open the fizzbuzz example to see how to declare your states and connections and callbacks before running the state machine
