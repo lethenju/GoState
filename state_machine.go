@@ -41,18 +41,14 @@ func (s State) Get_reason_for( to *State) func() bool {
 }
 
 func (s State) State_function () *State {
-	var alive = true
 	var next_state = &s
-	s.Core_function()
-	for alive {
-		for _, connected_state := range s.Connected {
-			if (connected_state.Reason_to_move() == true) { 
-				connected_state.Transition()
-				next_state = connected_state.Connection_state
-				alive = false
-				break
-			}
+	for _, connected_state := range s.Connected {
+		if (connected_state.Reason_to_move() == true) { 
+			connected_state.Transition()
+			next_state = connected_state.Connection_state
+			break
 		}
 	}
+
 	return next_state;
 }
