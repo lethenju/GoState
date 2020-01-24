@@ -54,7 +54,7 @@ func core_chambre() {
 func core_salon() {
 	fmt.Println("Vous voila dans le salon, il est grand et personne n'est la..")
 }
-var list_of_states []sm.State;
+var list_of_states []*sm.State;
 
 
 func parse_and_install() {
@@ -82,7 +82,7 @@ func parse_and_install() {
 		if (err == io.EOF) {
 			break
 		}
-		list_of_states = append(list_of_states, sm.State {
+		list_of_states = append(list_of_states, &sm.State {
 			Name : line[0],
 			Core_function : map_functions[line[1]],
 		})
@@ -100,15 +100,10 @@ func parse_and_install() {
 		}
 		for _, state_from := range list_of_states{
 			if state_from.Name == line[0] {
-
 				for _, state_to := range list_of_states{
-					fmt.Println(" = ", state_from.Name, state_to.Name);
-					fmt.Println(" - ", line[0], line[1]);
-
 					if state_to.Name == line[1] { 
-						
 						state_from.Connected = append(state_from.Connected,
-							sm.Connection{ Connection_state : &state_to,
+							sm.Connection{ Connection_state : state_to,
 										   Reason_to_move: map_reasons[line[2]],
 										   Transition: map_functions[line[3]],})
 
@@ -124,5 +119,5 @@ func parse_and_install() {
 }
 func main() {
 	parse_and_install()
-	runtime(&list_of_states[0])
+	runtime(list_of_states[0])
 }
