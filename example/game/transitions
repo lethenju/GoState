@@ -1,0 +1,4 @@
+Chambre,Salon,r_to_salon,t_to_salon
+Salon,Chambre,r_to_chambre,t_to_chambre
+Salon,Cuisine,r_to_cuisine,t_to_cuisine
+Cuisine,Salon,r_to_salon,t_to_salon
