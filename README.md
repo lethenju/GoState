@@ -18,7 +18,39 @@ There is 2 ways of declaring your state machine.
 
 #### Declaring my State Machine Statically
 
-TODO (for now see fizzbuzz example)
+You can simply declare your state machine statically. In this perspective, you need to create and populate State structures.
+
+```go
+/** Represents a State.
+  */
+type State struct {
+	Name string               // Name of the State
+	Core_function func()      // user-defined Function that gets executed when you enter that state. 
+	Connected    []Connection // List of connections from that state
+}
+```
+
+You can do it like so : 
+
+```go
+var my_state sm.State
+my_state.Name = "My State"
+my_state.Core_function = func() {
+	fmt.Println("Hey !")
+}
+my_state.Connected   = append(my_state.Connected, 
+    sm.Connection{ Connection_state : &another_state,
+        Reason_to_move : func () bool { 
+                return true;
+            },
+            Transition : func () {
+                fmt.Println("[Mine] -> [Another]")
+            }},
+```
+It is as simple as that !
+
+The core function will be called when entering to the state.
+The Reason to move function will be tested for the transition to happen. If it returns true, the transition will occur, firing the Transition function too.
 
 #### Declaring my State Machine via CSV 
 
