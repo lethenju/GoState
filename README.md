@@ -49,12 +49,47 @@ my_state.Connected   = append(my_state.Connected,
 ```
 It is as simple as that !
 
-The core function will be called when entering to the state.
-The Reason to move function will be tested for the transition to happen. If it returns true, the transition will occur, firing the Transition function too.
+The `core function` will be called when entering to the state.
+The `Reason to move` function will be tested for the transition to happen. If it returns true, the transition will occur, firing the `transition function` too.
 
 #### Declaring my State Machine via CSV 
 
-TODO (for now see game example)
+The last solution is a bit heavy for fat state machines, and needs to actually modelise directly in code.
+It can be very interesting in many ways to put the model elsewhere.
+
+For example, in CSV files ?
+
+*At first I wanted to use plantuml syntax, but I need to have a very specific format to have the callback names needed. Maybe I will try to implement it, later.*
+
+Here is the format of a line of the `states` CSV
+```csv
+Name of the state,core_function_callback
+```
+
+Here is the format of a line of the `transitions` CSV
+```csv
+Name of a first state,Name of a second state,reason_callback,transition_callback
+```
+
+After writing them down, in the code, you need several things :
+```go
+    // Declaring our void callbacks
+	map_functions := map[string] func ()  {
+		"core_function_callback": core_function_callback,
+		"transition_callback": transition_callback,
+		
+	}
+	// Declaring our boolean-returning callbacks
+	map_reasons := map[string] func () bool {
+		"reason_callback": reason_callback,
+	}
+	
+	// Launch the parsing, install the model and get a reference to the first state
+	first_state := sm.Parse_and_install(map_functions, map_reasons)
+```
+
+I know, it is not ideal, but we need to do it that way for now, for the parser to understand the function names..
+
 
 ### Launching State Machine
 
@@ -72,4 +107,8 @@ func runtime(s *sm.State) { // The parameter is the entry state of the SM.
 }
 ```
 
-TODO
+And now, in your main, you should have at least a reference to the first state (The entry one).
+So you can simply call `runtime(&my_state)`, and thats it !
+
+Any questions ?
+Send to julien.letheno@gmail.com, I will be happy to answer them !
