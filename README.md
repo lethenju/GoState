@@ -1,4 +1,4 @@
-# state_machine
+# State Machine Framework
 A simple framework for designing state machines in Go
 
 ## What is it ?
@@ -6,10 +6,38 @@ A simple framework for designing state machines in Go
 You like to design state machines but you dont want to waste time with the implementation ? 
 This project aim to answer your needs and provide an easy way to design your state machines based programs very easily.
 
-## Cool ! How can I use it
+## Cool ! How can I use it ?
 
-I'm currently writing a guide, but for now you can simply open the fizzbuzz example to see how to declare your states and connections and callbacks before running the state machine
+You need to declare your state machine first before playing with it, of course
 
-## Meh it seems super boring and full of boilerplate code
+### Declaring State Machines
 
-Yeah I know ! I'm currently working on a tool to generate automatically the go code from a representation (plantuml maybe?) of a state diagram
+There is 2 ways of declaring your state machine.
+* Statically in the code
+* Via CSV files
+
+#### Declaring my State Machine Statically
+
+TODO (for now see fizzbuzz example)
+
+#### Declaring my State Machine via CSV 
+
+TODO (for now see game example)
+
+### Launching State Machine
+
+Structure of the `runtime` Function
+
+The runtime function is the heart of the State Machine. You need this minimal code to make the framework run
+```go
+func runtime(s *sm.State) { // The parameter is the entry state of the SM.
+  for {
+	    // Launch the user-defined core function of the state 
+		  s.Core_function()
+		  // Transition to another state if possible (the state function will take care of everything)
+		  s = (*s).State_function()
+	}
+}
+```
+
+TODO
