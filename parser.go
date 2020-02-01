@@ -1,82 +1,83 @@
-/*  -- State Machine Framework 
- /  LICENCE : MIT
- /  Author : Julien LE THENO
+/*  -- State Machine Framework
+/  LICENCE : MIT
+/  Author : Julien LE THENO
 */
-package state_machine
+
+package statemachine
 
 import (
+	"encoding/csv"
+	"fmt"
 	"io"
-        "fmt"
 	"os"
-	"encoding/csv" 
 )
 
 /** List of states
- *  TODO DONT LET IT STATIC ! 
+ *  TODO DONT LET IT STATIC !
  */
-var list_of_states []*State;
+var listOfStates []*State
 
-/** Parses the "state" csv file and the "transition" csv file to construct the model in state machine go objects and structures.
- *  Takes in parameter maps with the callback functions to introduce in the model, and their names as a String.
- *  Maps are separated between "map_function" for void functions
- *  and "map_reasons" that have to return a bool
- *  Returns the first state of the SM.
+/*ParseAndInstall Parses the "state" csv file and the "transition" csv file to construct the model in state machine go objects and structures.
+*  Takes in parameter maps with the callback functions to introduce in the model, and their names as a String.
+*  Maps are separated between "map_function" for void functions
+*  and "map_reasons" that have to return a bool
+*  Returns the first state of the SM.
  */
-func Parse_and_install(state_file string, transition_file string, map_functions map[string] func (),  map_reasons map[string] func () bool) *State {
-	
-	// open the State file 
-	// TODO files in argument 
-	input_file_states, err := os.Open(state_file)
-	if (err != nil) {
+func ParseAndInstall(stateFile string, transitionFile string, mapFunctions map[string]func(), mapReasons map[string]func() bool) *State {
+
+	// open the State file
+	// TODO files in argument
+	inputFileStates, err := os.Open(stateFile)
+	if err != nil {
 		fmt.Println(err)
 		return nil
 	}
 	// instantiate a Reader from the CSV package.
-	lines := csv.NewReader(input_file_states)
-	
+	lines := csv.NewReader(inputFileStates)
+
 	// Parsing states
 	for {
 		line, err := lines.Read()
-		if (err == io.EOF) {
+		if err == io.EOF {
 			break
 		}
-		list_of_states = append(list_of_states, &State {
-			Name : line[0],
-			Core_function : map_functions[line[1]],
+		listOfStates = append(listOfStates, &State{
+			Name:          line[0],
+			Core_function: mapFunctions[line[1]],
 		})
 	}
-	
+
 	// open the transition file
-	input_file_transitions, err := os.Open(transition_file)
-		if (err != nil) {
+	inputFileTransitions, err := os.Open(transitionFile)
+	if err != nil {
 		fmt.Println(err)
 		return nil
 	}
-        // instantiate a Reader from the CSV package.
-	lines_transitions := csv.NewReader(input_file_transitions)
+	// instantiate a Reader from the CSV package.
+	linesTransitions := csv.NewReader(inputFileTransitions)
 	// Parse the transitions
 	for {
-		line, err := lines_transitions.Read()
-		if (err == io.EOF) {
+		line, err := linesTransitions.Read()
+		if err == io.EOF {
 			break
 		}
 		// TODO Handle cases when the referenced state doesnt exist
-		for _, state_from := range list_of_states{
-			if state_from.Name == line[0] {
-				for _, state_to := range list_of_states{
-					if state_to.Name == line[1] { 
-						state_from.Connected = 
-						append(state_from.Connected,
-						       Connection{ Connection_state : state_to,
-				                                   Reason_to_move: map_reasons[line[2]],
-							           Transition: map_functions[line[3]],})
-						break;
+		for _, stateFrom := range listOfStates {
+			if stateFrom.Name == line[0] {
+				for _, stateTo := range listOfStates {
+					if stateTo.Name == line[1] {
+						stateFrom.Connected =
+							append(stateFrom.Connected,
+								Connection{Connection_state: stateTo,
+									Reason_to_move: mapReasons[line[2]],
+									Transition:     mapFunctions[line[3]]})
+						break
 					}
 				}
-				break;		
+				break
 			}
 		}
 	}
 
-	return list_of_states[0]	
+	return listOfStates[0]
 }

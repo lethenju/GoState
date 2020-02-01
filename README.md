@@ -25,7 +25,7 @@ You can simply declare your state machine statically. In this perspective, you n
   */
 type State struct {
 	Name string               // Name of the State
-	Core_function func()      // user-defined Function that gets executed when you enter that state. 
+	CoreFunction func()      // user-defined Function that gets executed when you enter that state. 
 	Connected    []Connection // List of connections from that state
 }
 ```
@@ -33,14 +33,14 @@ type State struct {
 You can do it like so : 
 
 ```go
-var my_state sm.State
-my_state.Name = "My State"
-my_state.Core_function = func() {
+var myState sm.State
+myState.Name = "My State"
+myState.CoreFunction = func() {
 	fmt.Println("Hey !")
 }
-my_state.Connected   = append(my_state.Connected, 
-    sm.Connection{ Connection_state : &another_state,
-        Reason_to_move : func () bool { 
+myState.Connected   = append(myState.Connected, 
+    sm.Connection{ ConnectionState : &anotherState,
+        ReasonToMove : func () bool { 
                 return true;
             },
             Transition : func () {
@@ -100,15 +100,15 @@ The runtime function is the heart of the State Machine. You need this minimal co
 func runtime(s *sm.State) { // The parameter is the entry state of the SM.
   for {
 	    // Launch the user-defined core function of the state 
-		  s.Core_function()
+		  s.CoreFunction()
 		  // Transition to another state if possible (the state function will take care of everything)
-		  s = (*s).State_function()
+		  s = (*s).StateFunction()
 	}
 }
 ```
 
 And now, in your main, you should have at least a reference to the first state (The entry one).
-So you can simply call `runtime(&my_state)`, and thats it !
+So you can simply call `runtime(&myState)`, and thats it !
 
 Any questions ?
 Send to julien.letheno@gmail.com, I will be happy to answer them !

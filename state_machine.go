@@ -1,10 +1,11 @@
-/*  -- State Machine Framework 
- /  LICENCE : MIT
- /  Author : Julien LE THENO
+/*  -- State Machine Framework
+/  LICENCE : MIT
+/  Author : Julien LE THENO
 */
-package state_machine
 
-/** The interface Moves declares functions available for a State object
+package statemachine
+
+/*Moves The interface Moves declares functions available for a State object
  */
 type Moves interface {
 	Get_transition_to(State) func()
@@ -12,44 +13,43 @@ type Moves interface {
 	State_function() func()
 }
 
-/** Represents a Connection ( a transition) between states. It is strictly directional,
+/*Connection Represents a Connection ( a transition) between states. It is strictly directional,
  *  if you want bidirectionnality you need 2 Connections.
- */ 
+ */
 type Connection struct {
-	Connection_state  *State       // The state it is connected to
-	Reason_to_move     func() bool // The "reason to move" test function: code that tests if the transition is possible
-	Transition         func()      // The transition function : code that is executed during a transition
+	ConnectionState *State      // The state it is connected to
+	ReasonToMove    func() bool // The "reason to move" test function: code that tests if the transition is possible
+	Transition      func()      // The transition function : code that is executed during a transition
 }
 
-/** Represents a State.
-  */
+/*State Represents a State.
+ */
 type State struct {
-	Name string               // Name of the State
-	Core_function func()      // user-defined Function that gets executed when you enter that state. 
+	Name         string       // Name of the State
+	CoreFunction func()       // user-defined Function that gets executed when you enter that state.
 	Connected    []Connection // List of connections from that state
 }
 
-/** Implementation of the interface Moves
+/*GetTransitionTo Implementation of the interface Moves
  *  return the transition function from a state to another one
  */
-func (s State) Get_transition_to ( to *State) func() {
-	for _, connected_state := range s.Connected {
-		if (connected_state.Connection_state == to) {
-			return connected_state.Transition
+func (s State) GetTransitionTo(to *State) func() {
+	for _, connectedState := range s.Connected {
+		if connectedState.ConnectionState == to {
+			return connectedState.Transition
 		}
 	}
 	// If we didnt find the transition, return empty function
 	return func() {}
 }
 
-
-/** Implementation of the interface Moves
+/*GetReasonFor Implementation of the interface Moves
  *  return the "reason_to_move" function from a state to another one
  */
-func (s State) Get_reason_for( to *State) func() bool {
-	for _, connected_state := range s.Connected {
-		if (connected_state.Connection_state == to) {
-			return connected_state.Reason_to_move
+func (s State) GetReasonFor(to *State) func() bool {
+	for _, connectedState := range s.Connected {
+		if connectedState.ConnectionState == to {
+			return connectedState.ReasonToMove
 		}
 	}
 	// If we didnt find the reason, return empty function
@@ -59,20 +59,19 @@ func (s State) Get_reason_for( to *State) func() bool {
 	}
 }
 
-
-/** State function : it is the underlying function that makes it all work.
- *  It manages the transitions, given the results of reason to move. 
- *  Returns the next state. 
+/*StateFunction State function : it is the underlying function that makes it all work.
+ *  It manages the transitions, given the results of reason to move.
+ *  Returns the next state.
  */
-func (s State) State_function () *State {
-	var next_state = &s
-	for _, connected_state := range s.Connected {
-		if (connected_state.Reason_to_move() == true) { 
-			connected_state.Transition()
-			next_state = connected_state.Connection_state
+func (s State) StateFunction() *State {
+	var nextState = &s
+	for _, connectedState := range s.Connected {
+		if connectedState.ReasonToMove() == true {
+			connectedState.Transition()
+			nextState = connectedState.ConnectionState
 			break
 		}
 	}
 
-	return next_state;
+	return nextState
 }
