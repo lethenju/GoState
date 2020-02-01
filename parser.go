@@ -22,11 +22,11 @@ var list_of_states []*State;
  *  and "map_reasons" that have to return a bool
  *  Returns the first state of the SM.
  */
-func Parse_and_install( map_functions map[string] func (),  map_reasons map[string] func () bool) *State {
+func Parse_and_install(state_file string, transition_file string, map_functions map[string] func (),  map_reasons map[string] func () bool) *State {
 	
 	// open the State file 
 	// TODO files in argument 
-	input_file_states, err := os.Open("states")
+	input_file_states, err := os.Open(state_file)
 	if (err != nil) {
 		fmt.Println(err)
 		return nil
@@ -47,7 +47,7 @@ func Parse_and_install( map_functions map[string] func (),  map_reasons map[stri
 	}
 	
 	// open the transition file
-	input_file_transitions, err := os.Open("transitions")
+	input_file_transitions, err := os.Open(transition_file)
 		if (err != nil) {
 		fmt.Println(err)
 		return nil
