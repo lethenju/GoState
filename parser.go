@@ -42,8 +42,8 @@ func ParseAndInstall(stateFile string, transitionFile string, mapFunctions map[s
 			break
 		}
 		listOfStates = append(listOfStates, &State{
-			Name:          line[0],
-			Core_function: mapFunctions[line[1]],
+			Name:         line[0],
+			CoreFunction: mapFunctions[line[1]],
 		})
 	}
 
@@ -68,9 +68,9 @@ func ParseAndInstall(stateFile string, transitionFile string, mapFunctions map[s
 					if stateTo.Name == line[1] {
 						stateFrom.Connected =
 							append(stateFrom.Connected,
-								Connection{Connection_state: stateTo,
-									Reason_to_move: mapReasons[line[2]],
-									Transition:     mapFunctions[line[3]]})
+								Connection{ConnectionState: stateTo,
+									ReasonToMove: mapReasons[line[2]],
+									Transition:   mapFunctions[line[3]]})
 						break
 					}
 				}
