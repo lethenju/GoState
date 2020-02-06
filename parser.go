@@ -21,16 +21,16 @@ var listOfStates []*State
 *  Takes in parameter maps with the callback functions to introduce in the model, and their names as a String.
 *  Maps are separated between "map_function" for void functions
 *  and "map_reasons" that have to return a bool
-*  Returns the first state of the SM.
+*  Returns the first state of the SM, otherwise an error.
  */
-func ParseAndInstall(stateFile string, transitionFile string, mapFunctions map[string]func(), mapReasons map[string]func() bool) *State {
+func ParseAndInstall(stateFile string, transitionFile string, mapFunctions map[string]func(), mapReasons map[string]func() bool) (*State, error) {
 
 	// open the State file
 	// TODO files in argument
 	inputFileStates, err := os.Open(stateFile)
 	if err != nil {
 		fmt.Println(err)
-		return nil
+		return nil, err
 	}
 	// instantiate a Reader from the CSV package.
 	lines := csv.NewReader(inputFileStates)
@@ -51,7 +51,7 @@ func ParseAndInstall(stateFile string, transitionFile string, mapFunctions map[s
 	inputFileTransitions, err := os.Open(transitionFile)
 	if err != nil {
 		fmt.Println(err)
-		return nil
+		return nil, err
 	}
 	// instantiate a Reader from the CSV package.
 	linesTransitions := csv.NewReader(inputFileTransitions)
@@ -79,5 +79,5 @@ func ParseAndInstall(stateFile string, transitionFile string, mapFunctions map[s
 		}
 	}
 
-	return listOfStates[0]
+	return listOfStates[0], nil
 }

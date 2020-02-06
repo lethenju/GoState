@@ -116,8 +116,11 @@ func main() {
 	}
 
 	// Launch the parsing, install the model and get a reference to the first state
-	firstState := sm.ParseAndInstall("states", "transitions", mapFunctions, mapReasons)
-
+	firstState, err := sm.ParseAndInstall("states", "transitions", mapFunctions, mapReasons)
+	if err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
 	// Launch the SM with the first state.
 	runtime(firstState)
 }
