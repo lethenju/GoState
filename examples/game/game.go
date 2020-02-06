@@ -40,9 +40,9 @@ var reader = bufio.NewReader(os.Stdin)
  func runtime(s *sm.State) { // The parameter is the entry state of the SM.
 	for {
 	        // Launch the user-defined core function of the state
-		s.Core_function()
+		s.CoreFunction()
 		// Transition to another state if possible (the state function will take care of everything)
-		s = (*s).State_function()
+		s = (*s).StateFunction()
 	}
 }
  *
