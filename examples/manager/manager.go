@@ -18,14 +18,24 @@ func runtime(s *sm.State) {
 	}
 }
 
+// A used defined variable
+// Can be a string or an int, but the value is always stored as a string
+type Variable struct {
+	name  string 
+	value string
+}
 
+// The state machine representation
 type stateMachine struct {
-	states []State;
+	states []sm.State
+	variables []Variable
 }
 
 
 func main() {
 	fmt.Println("Welcome to Manager!")
+
+	var machine stateMachine;
 	var runningFlag = true
 	for (runningFlag) {
 
@@ -38,7 +48,7 @@ func main() {
 		case "CREATE":
 			switch (command[1]) {
 				
-		 //-> Create variable (name, value)
+				//-> Create variable (name, value)
 			case "VARIABLE":
 				//TODO Add variable command[2] with optional value command[3]
 				break
@@ -47,11 +57,10 @@ func main() {
 			case "STATE":
 				//TODO Add state command[2]
 				break
-		 //-> Create Transition (Transition Name, From state, To state)
+		 //-> Create Transition ( From state, To state)
 			case "TRANSITION":
-				// Verify command[3] and command[4] are in the list of states
-				// Todo add transition command[2] to the state command[3]
-				// command[4]
+				// Verify command[2] and command[3] are in the list of states
+				// Todo add transition  to the state command[2]
 				break
 			}
 		case "ADD":
@@ -62,7 +71,7 @@ func main() {
 					Variable change include :
 						=  	(VAR) (INCR) (VALUE or VAR) // incrementation
 						=  	(VAR) (=)    (VALUE or VAR) // affectation */
-			case: "STATE_BEHAVIOUR":
+			case "STATE_BEHAVIOUR":
 				// TODO Verify command in command[3] command[4] command[5]
 				// command[3] must be in variables
 				// command[4] must be in commandlist
@@ -71,45 +80,49 @@ func main() {
 				switch (command[2]) {
 				case "ENTERING":
 					// TODO Add command in core function of state
-					break;
+					break
 				case "LEAVING":
 					// TODO Add command in ?
-					break;
+					break
 				}
-				break;
+				break
 			
 		    /*-> Add Reason to move
 		 		(State from, State to, VAR, COMPARISON, VALUE or VAR)
 					    A reason to move is based on variables
 						   = when (VAR) > (VALUE or VAR) 
 						   = when (VAR) == (VALUE or VAR)*/
-			case: "REASON_TO_MOVE":
+			case "REASON_TO_MOVE":
 				// TODO verify in all states if the transition exists
 				// if not create it
+			break
+			}
+		/*	
+			-> Display states
+			- State Name 
+					In : (VAR) (OPERATION) (VAR OR VALUE)
+						  ...
+					Out : (VAR) (OPERATION) (VAR OR VALUE)
+						  ...
+				Transitions In :
+					Name transitions
+					..
+				Transition Out : 
+					Name transitions
+					..*/
+		case "DISPLAY":
+			// Todo display state
+			break
+		case "RUN":
+			switch (command[1]) {
+				case "MANUAL":
+					break
+				case "AUTO":
+					break
 			}
 		}
 
 		/** TODO Get user command
-
-
-		 -> Display states
-					- State Name 
-							In : (VAR) (OPERATION) (VAR OR VALUE)
-							      ...
-							Out : (VAR) (OPERATION) (VAR OR VALUE)
-							      ...
-						Transitions In :
-							Name transitions
-							..
-						Transition Out : 
-							Name transitions
-							..
-		 -> Display Transitions
-					- Transition Name
-							In : State
-							Reason : (VAR) (CONDITION) (VAR)
-									 ...
-							Out : State
 
 		-> Run (manually)
 			-> Step
