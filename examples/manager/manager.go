@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 	"strings"
 	"time"
@@ -32,6 +33,107 @@ type stateMachine struct {
 	Variables []Variable
 }
 
+func commandHandler(command []string, machine *stateMachine) (err error) {
+
+	switch command[0] {
+	case "CREATE":
+		switch command[1] {
+		//-> Create variable (name, value)
+		case "VARIABLE":
+			if len(command) < 3 || len(command) > 4 {
+				return errors.New("Number of parameters incorrect")
+			}
+			if len(command) < 4 {
+				machine.Variables = append(machine.Variables, Variable{
+					Name:  command[2],
+					Value: ""})
+			}
+			machine.Variables = append(machine.Variables, Variable{
+				Name:  command[2],
+				Value: command[3]})
+			break
+
+		//-> Create state (Name)
+		case "STATE":
+			//TODO Add state command[2]
+			break
+		//-> Create Transition ( From state, To state)
+		case "TRANSITION":
+			// Verify command[2] and command[3] are in the list of states
+			// Todo add transition  to the state command[2]
+			break
+		}
+	case "ADD":
+		switch command[1] {
+
+		/*-> Add variable change in state
+		(State Name, Entering/Leaving, VAR, OPERATION, VALUE or VAR)
+			Variable change include :
+				=  	(VAR) (INCR) (VALUE or VAR) // incrementation
+				=  	(VAR) (=)    (VALUE or VAR) // affectation */
+		case "STATE_BEHAVIOUR":
+			// TODO Verify command in command[3] command[4] command[5]
+			// command[3] must be in variables
+			// command[4] must be in commandlist
+			// command[5] must be in variable OR is possible to cast as int
+
+			switch command[2] {
+			case "ENTERING":
+				// TODO Add command in core function of state
+				break
+			case "LEAVING":
+				// TODO Add command in ?
+				break
+			}
+			break
+
+			/*-> Add Reason to move
+			 (State from, State to, VAR, COMPARISON, VALUE or VAR)
+					A reason to move is based on variables
+					   = when (VAR) > (VALUE or VAR)
+					   = when (VAR) == (VALUE or VAR)*/
+		case "REASON_TO_MOVE":
+			// TODO verify in all states if the transition exists
+			// if not create it
+			break
+		}
+	/*
+		-> Display states
+		- State Name
+				In : (VAR) (OPERATION) (VAR OR VALUE)
+					  ...
+				Out : (VAR) (OPERATION) (VAR OR VALUE)
+					  ...
+			Transitions In :
+				Name transitions
+				..
+			Transition Out :
+				Name transitions
+				..*/
+	case "DISPLAY":
+		// Todo display state
+		break
+	case "RUN":
+		switch command[1] {
+		case "MANUAL":
+			break
+		case "AUTO":
+			break
+		}
+	}
+
+	/** TODO Get user command
+
+	-> Run (manually)
+		-> Step
+		-> Display Current State
+		-> Display Current Transition
+		-> Display vars
+				Display all vars with values
+	-> Run (auto) with timer (sleep between transitions)
+	*/
+}
+
 func main() {
 	fmt.Println("Welcome to Manager!")
 
@@ -45,95 +147,6 @@ func main() {
 		fmt.Scan(&userInput)
 		userInput = strings.ToUpper(userInput)
 		command := strings.Split(userInput, " ")
-		switch command[0] {
-		case "CREATE":
-			switch command[1] {
-			//-> Create variable (name, value)
-			case "VARIABLE":
-				machine.Variables = append(machine.Variables, Variable{
-					Name:  command[2],
-					Value: command[3]})
-				//TODO Add variable command[2] with optional value command[3]
-				break
-
-			//-> Create state (Name)
-			case "STATE":
-				//TODO Add state command[2]
-				break
-			//-> Create Transition ( From state, To state)
-			case "TRANSITION":
-				// Verify command[2] and command[3] are in the list of states
-				// Todo add transition  to the state command[2]
-				break
-			}
-		case "ADD":
-			switch command[1] {
-
-			/*-> Add variable change in state
-			(State Name, Entering/Leaving, VAR, OPERATION, VALUE or VAR)
-				Variable change include :
-					=  	(VAR) (INCR) (VALUE or VAR) // incrementation
-					=  	(VAR) (=)    (VALUE or VAR) // affectation */
-			case "STATE_BEHAVIOUR":
-				// TODO Verify command in command[3] command[4] command[5]
-				// command[3] must be in variables
-				// command[4] must be in commandlist
-				// command[5] must be in variable OR is possible to cast as int
-
-				switch command[2] {
-				case "ENTERING":
-					// TODO Add command in core function of state
-					break
-				case "LEAVING":
-					// TODO Add command in ?
-					break
-				}
-				break
-
-				/*-> Add Reason to move
-				 		(State from, State to, VAR, COMPARISON, VALUE or VAR)
-							    A reason to move is based on variables
-								   = when (VAR) > (VALUE or VAR)
-								   = when (VAR) == (VALUE or VAR)*/
-			case "REASON_TO_MOVE":
-				// TODO verify in all states if the transition exists
-				// if not create it
-				break
-			}
-		/*
-			-> Display states
-			- State Name
-					In : (VAR) (OPERATION) (VAR OR VALUE)
-						  ...
-					Out : (VAR) (OPERATION) (VAR OR VALUE)
-						  ...
-				Transitions In :
-					Name transitions
-					..
-				Transition Out :
-					Name transitions
-					..*/
-		case "DISPLAY":
-			// Todo display state
-			break
-		case "RUN":
-			switch command[1] {
-			case "MANUAL":
-				break
-			case "AUTO":
-				break
-			}
-		}
-
-		/** TODO Get user command
-
-		-> Run (manually)
-			-> Step
-			-> Display Current State
-			-> Display Current Transition
-			-> Display vars
-					Display all vars with values
-		-> Run (auto) with timer (sleep between transitions)
-		*/
+		commandHandler(command, &machine)
 	}
 }
