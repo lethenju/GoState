@@ -55,12 +55,48 @@ func commandHandler(command []string, machine *stateMachine) (err error) {
 
 		//-> Create state (Name)
 		case "STATE":
-			//TODO Add state command[2]
+			if len(command) != 3 {
+				return errors.New("Number of parameters incorrect")
+			}
+
+			machine.States = append(machine.States, sm.State{
+				Name:         command[3],
+				CoreFunction: func() {}})
 			break
 		//-> Create Transition ( From state, To state)
 		case "TRANSITION":
 			// Verify command[2] and command[3] are in the list of states
+			// Then add the transition
+
+			if len(command) != 4 {
+				return errors.New("Number of parameters incorrect")
+			}
+			// Search for the state
+			var from *sm.State
+			var to *sm.State
+
+			for _, state := range machine.States {
+				if command[2] == state.Name {
+					from = &state
+				}
+				if command[3] == state.Name {
+					to = &state
+				}
+			}
+			if from == nil {
+				return errors.New("Didnt find state " + command[2])
+			} else if to == nil {
+				return errors.New("Didnt find state " + command[3])
+
+			}
 			// Todo add transition  to the state command[2]
+			from.Connected = append(from.Connected, sm.Connection{ConnectionState: to,
+				ReasonToMove: func() bool {
+					return true
+				},
+				Transition: func() {
+					fmt.Println("[" + from.Name + "] -> [" + to.Name + "]")
+				}})
 			break
 		}
 	case "ADD":
@@ -132,6 +168,7 @@ func commandHandler(command []string, machine *stateMachine) (err error) {
 				Display all vars with values
 	-> Run (auto) with timer (sleep between transitions)
 	*/
+	return nil
 }
 
 func main() {
