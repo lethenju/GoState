@@ -1,8 +1,11 @@
 package main
 
 import (
+	"bufio"
 	"errors"
 	"fmt"
+	"os"
+	"strconv"
 	"strings"
 	"time"
 
@@ -33,11 +36,31 @@ type stateMachine struct {
 	Variables []Variable
 }
 
+func getState(stateStr string, states *[]sm.State) *sm.State {
+	var statePtr *sm.State
+	for _, state := range *states {
+		if stateStr == state.Name {
+			statePtr = &state
+		}
+	}
+	return statePtr
+}
+
+func getVariable(variableStr string, variables []Variable) *Variable {
+	var variablePtr *Variable
+	for _, variable := range variables {
+		if variableStr == variable.Name {
+			variablePtr = &variable
+		}
+	}
+	return variablePtr
+}
+
 func commandHandler(command []string, machine *stateMachine) (err error) {
 
-	switch command[0] {
+	switch strings.ToUpper(command[0]) {
 	case "CREATE":
-		switch command[1] {
+		switch strings.ToUpper(command[1]) {
 		//-> Create variable (name, value)
 		case "VARIABLE":
 			if len(command) < 3 || len(command) > 4 {
@@ -60,7 +83,7 @@ func commandHandler(command []string, machine *stateMachine) (err error) {
 			}
 
 			machine.States = append(machine.States, sm.State{
-				Name:         command[3],
+				Name:         command[2],
 				CoreFunction: func() {}})
 			break
 		//-> Create Transition ( From state, To state)
@@ -72,17 +95,10 @@ func commandHandler(command []string, machine *stateMachine) (err error) {
 				return errors.New("Number of parameters incorrect")
 			}
 			// Search for the state
-			var from *sm.State
-			var to *sm.State
 
-			for _, state := range machine.States {
-				if command[2] == state.Name {
-					from = &state
-				}
-				if command[3] == state.Name {
-					to = &state
-				}
-			}
+			from := getState(command[2], &machine.States)
+			to := getState(command[2], &machine.States)
+
 			if from == nil {
 				return errors.New("Didnt find state " + command[2])
 			} else if to == nil {
@@ -100,27 +116,79 @@ func commandHandler(command []string, machine *stateMachine) (err error) {
 			break
 		}
 	case "ADD":
-		switch command[1] {
+		switch strings.ToUpper(command[1]) {
 
 		/*-> Add variable change in state
-		(State Name, Entering/Leaving, VAR, OPERATION, VALUE or VAR)
+		(State Name, VAR, OPERATION, VALUE or VAR)
 			Variable change include :
 				=  	(VAR) (INCR) (VALUE or VAR) // incrementation
 				=  	(VAR) (=)    (VALUE or VAR) // affectation */
 		case "STATE_BEHAVIOUR":
-			// TODO Verify command in command[3] command[4] command[5]
+			// TODO Verify command in command [2] command[3] command[4] command[5]
+			// command[2] must be in states
 			// command[3] must be in variables
 			// command[4] must be in commandlist
 			// command[5] must be in variable OR is possible to cast as int
-
-			switch command[2] {
-			case "ENTERING":
-				// TODO Add command in core function of state
-				break
-			case "LEAVING":
-				// TODO Add command in ?
-				break
+			if len(command) != 6 {
+				return errors.New("Number of parameters incorrect")
 			}
+			state := getState(command[2], &machine.States)
+			if state == nil {
+				return errors.New("State " + command[2] + " is unknown")
+			}
+			firstVar := getVariable(command[3], machine.Variables)
+			if firstVar == nil {
+				return errors.New("Variable " + command[3] + " is unknown")
+			}
+			if strings.ToUpper(command[4]) != "INCR" && command[4] != "=" {
+				return errors.New("Operation '" + command[4] + "' unknown. Use '=' or 'INCR'")
+			}
+			operation := strings.ToUpper(command[4])
+			secondVar := getVariable(command[5], machine.Variables)
+			var value string
+			if secondVar == nil {
+				// Verify it is castable
+				_, err := strconv.Atoi(command[5])
+				if err != nil {
+					return errors.New("Second variable '" + command[5] + "' is not a known variable nor a int value")
+				}
+				_, err = strconv.Atoi(firstVar.Value)
+				if err != nil {
+					return errors.New("First variable '" + firstVar.Name + "' is not a int variable (Value='" + firstVar.Value + "')")
+				}
+
+				value = command[5]
+			} else {
+				value = secondVar.Value
+			}
+			switch operation {
+			case "=":
+				state.CoreFunction = func() {
+					firstVar.Value = value
+				}
+				break
+			case "INCR":
+
+				state.CoreFunction = func() {
+					// Append if string, increment if int
+					secondVarInt, err := strconv.Atoi(value)
+					if err != nil {
+						// Append
+						firstVar.Value = firstVar.Value + secondVar.Value
+					} else {
+						// Increment
+						firstVarInt, err := strconv.Atoi(firstVar.Value)
+						if err != nil {
+							fmt.Print("First variable '" + firstVar.Name + "' is not a int variable (Value='" + firstVar.Value + "')")
+							panic(0)
+						}
+						firstVarInt += secondVarInt
+						firstVar.Value = strconv.Itoa(firstVarInt)
+					}
+				}
+
+			}
+
 			break
 
 			/*-> Add Reason to move
@@ -129,7 +197,13 @@ func commandHandler(command []string, machine *stateMachine) (err error) {
 					   = when (VAR) > (VALUE or VAR)
 					   = when (VAR) == (VALUE or VAR)*/
 		case "REASON_TO_MOVE":
-			// TODO verify in all states if the transition exists
+			// TODO verify state from exists,
+			// TODO verify State to exists,
+			// TODO verify VAR1 exists
+			// TODO verify comparison is in ">", "==", "<", ">=", "<="
+			//    And only '==' if VAR1 and VAR2 are strings
+			// TODO verify VAR2 exists or is castable
+			// TODO verify State From if the transition exists
 			// if not create it
 			break
 		}
@@ -147,10 +221,19 @@ func commandHandler(command []string, machine *stateMachine) (err error) {
 				Name transitions
 				..*/
 	case "DISPLAY":
-		// Todo display state
+		for _, state := range machine.States {
+			fmt.Println("State : " + state.Name)
+			for _, transition := range state.Connected {
+				fmt.Println(" -> " + transition.ConnectionState.Name)
+			}
+		}
+
+		for _, variable := range machine.Variables {
+			fmt.Println("Variable : " + variable.Name + " (" + variable.Value + ")")
+		}
 		break
 	case "RUN":
-		switch command[1] {
+		switch strings.ToUpper(command[1]) {
 		case "MANUAL":
 			break
 		case "AUTO":
@@ -179,11 +262,26 @@ func main() {
 	var runningFlag = true
 	for runningFlag {
 
-		var userInput string
-		fmt.Print("> ")
-		fmt.Scan(&userInput)
-		userInput = strings.ToUpper(userInput)
-		command := strings.Split(userInput, " ")
-		commandHandler(command, &machine)
+		scanner := bufio.NewScanner(os.Stdin)
+		var command []string
+		for len(command) == 0 {
+
+			fmt.Print("> ")
+			if !scanner.Scan() {
+				return
+			}
+			userInput := scanner.Text()
+			command = strings.Fields(userInput)
+
+		}
+		if strings.ToUpper(command[0]) == "EXIT" {
+			fmt.Println("Goodbye !")
+			runningFlag = false
+			break
+		}
+		res := commandHandler(command, &machine)
+		if res != nil {
+			fmt.Println("ERROR :" + res.Error())
+		}
 	}
 }
