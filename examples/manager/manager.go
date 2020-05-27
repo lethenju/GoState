@@ -37,29 +37,30 @@ type stateMachine struct {
 }
 
 func getState(stateStr string, states *[]sm.State) *sm.State {
-	var statePtr *sm.State
 	for _, state := range *states {
 		if stateStr == state.Name {
-			statePtr = &state
+			return &state
 		}
 	}
-	return statePtr
+	return nil
 }
 
 func getVariable(variableStr string, variables []Variable) *Variable {
-	var variablePtr *Variable
 	for _, variable := range variables {
 		if variableStr == variable.Name {
-			variablePtr = &variable
+			return &variable
 		}
 	}
-	return variablePtr
+	return nil
 }
 
 func commandHandler(command []string, machine *stateMachine) (err error) {
 
 	switch strings.ToUpper(command[0]) {
 	case "CREATE":
+		if len(command) < 2 {
+			return errors.New("Not enough arguments")
+		}
 		switch strings.ToUpper(command[1]) {
 		//-> Create variable (name, value)
 		case "VARIABLE":
@@ -70,10 +71,11 @@ func commandHandler(command []string, machine *stateMachine) (err error) {
 				machine.Variables = append(machine.Variables, Variable{
 					Name:  command[2],
 					Value: ""})
+			} else {
+				machine.Variables = append(machine.Variables, Variable{
+					Name:  command[2],
+					Value: command[3]})
 			}
-			machine.Variables = append(machine.Variables, Variable{
-				Name:  command[2],
-				Value: command[3]})
 			break
 
 		//-> Create state (Name)
@@ -97,7 +99,7 @@ func commandHandler(command []string, machine *stateMachine) (err error) {
 			// Search for the state
 
 			from := getState(command[2], &machine.States)
-			to := getState(command[2], &machine.States)
+			to := getState(command[3], &machine.States)
 
 			if from == nil {
 				return errors.New("Didnt find state " + command[2])
@@ -113,6 +115,11 @@ func commandHandler(command []string, machine *stateMachine) (err error) {
 				Transition: func() {
 					fmt.Println("[" + from.Name + "] -> [" + to.Name + "]")
 				}})
+			fmt.Println(&from)
+			fmt.Println(from)
+			fmt.Println(&to)
+			fmt.Println(to)
+
 			break
 		}
 	case "ADD":
@@ -221,8 +228,12 @@ func commandHandler(command []string, machine *stateMachine) (err error) {
 				Name transitions
 				..*/
 	case "DISPLAY":
-		for _, state := range machine.States {
+		states := machine.States
+		for _, state := range states {
 			fmt.Println("State : " + state.Name)
+			fmt.Println(&state)
+			fmt.Println(state)
+
 			for _, transition := range state.Connected {
 				fmt.Println(" -> " + transition.ConnectionState.Name)
 			}
