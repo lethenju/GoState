@@ -26,7 +26,7 @@ import (
 	"os"
 	"strings"
 
-	sm "github.com/lethenju/state_machine_framework"
+	sm "github.com/lethenju/gostate/pkg"
 )
 
 // We start from the "Chambre" position.

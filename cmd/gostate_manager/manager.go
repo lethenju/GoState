@@ -9,7 +9,7 @@ import (
 	"strings"
 	"time"
 
-	sm "github.com/lethenju/state_machine_framework"
+	sm "github.com/lethenju/gostate/pkg"
 )
 
 func runtime(s *sm.State) {
