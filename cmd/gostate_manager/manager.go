@@ -47,10 +47,10 @@ func getState(stateStr string, states *[]sm.State) *sm.State {
 	return nil
 }
 
-func getVariable(variableStr string, variables []Variable) *Variable {
-	for _, variable := range variables {
-		if variableStr == variable.Name {
-			return &variable
+func getVariable(variableStr string, variables *[]Variable) *Variable {
+	for i := 0; i < len(*variables); i++ {
+		if variableStr == (*variables)[i].Name {
+			return &(*variables)[i]
 		}
 	}
 	return nil
@@ -118,6 +118,8 @@ func commandHandler(command []string, machine *stateMachine) (err error) {
 				}})
 
 			break
+		default:
+			return errors.New("Unknown CREATE command. Please specify STATE, VARIABLE or TRANSITION")
 		}
 	case "ADD":
 		switch strings.ToUpper(command[1]) {
@@ -140,7 +142,7 @@ func commandHandler(command []string, machine *stateMachine) (err error) {
 			if state == nil {
 				return errors.New("State " + command[2] + " is unknown")
 			}
-			firstVar := getVariable(command[3], machine.Variables)
+			firstVar := getVariable(command[3], &machine.Variables)
 			if firstVar == nil {
 				return errors.New("Variable " + command[3] + " is unknown")
 			}
@@ -148,7 +150,7 @@ func commandHandler(command []string, machine *stateMachine) (err error) {
 				return errors.New("Operation '" + command[4] + "' unknown. Use '=' or 'INCR'")
 			}
 			operation := strings.ToUpper(command[4])
-			secondVar := getVariable(command[5], machine.Variables)
+			secondVar := getVariable(command[5], &machine.Variables)
 			var value string
 			if secondVar == nil {
 				// Verify it is castable
@@ -201,6 +203,72 @@ func commandHandler(command []string, machine *stateMachine) (err error) {
 					   = when (VAR) > (VALUE or VAR)
 					   = when (VAR) == (VALUE or VAR)*/
 		case "REASON_TO_MOVE":
+			if len(command) != 6 {
+				return errors.New("Incorrect number of arguments : REASON_TO_MOVE FROM TO VAR COMP VALUE/VAR")
+			}
+			from := getState(command[1], &machine.States)
+			if from == nil {
+				return errors.New("State " + command[1] + " is unknown")
+			}
+			to := getState(command[2], &machine.States)
+			if to == nil {
+				return errors.New("State " + command[2] + " is unknown")
+			}
+			var1 := getVariable(command[3], &machine.Variables)
+			if command[4] != ">" &&
+				command[4] != ">=" &&
+				command[4] != "==" &&
+				command[4] != "<=" &&
+				command[4] != "<" {
+				return errors.New("Unknown comparison " + command[4])
+			}
+			comparison := command[4]
+			_, err := strconv.Atoi(var1.Value)
+			if err != nil {
+				// Then we are comparing strings
+				if comparison != "==" {
+					return errors.New("You are comparing strings with something else than ==")
+				}
+			}
+			var2 := getVariable(command[5], &machine.Variables)
+			var var2Value int
+			if var2 == nil {
+				var2Value, err = strconv.Atoi(command[5])
+				if err != nil {
+					return errors.New(command[5] + " is not a known variable or a int value")
+				}
+			} else {
+				var2Value, err = strconv.Atoi(var2.Value)
+				if err != nil {
+					return errors.New(command[5] + " is not a known variable or a int value")
+				}
+			}
+			for i := 0; i < len(from.Connected); i++ {
+				if from.Connected[i].ConnectionState.Name == to.Name {
+					// Modify this transition
+					from.Connected[i].ReasonToMove = func() bool {
+						var1Int, err := strconv.Atoi(var1.Value)
+
+						switch comparison {
+						case "==":
+							if err != nil {
+								return (var1.Value == var2.Value)
+							}
+							return var1Int == var2Value
+						case ">":
+							return var1Int > var2Value
+						case ">=":
+							return var1Int >= var2Value
+						case "<":
+							return var1Int < var2Value
+						case "<=":
+							return var1Int <= var2Value
+						}
+						return false
+					}
+				}
+			}
+
 			// TODO verify state from exists,
 			// TODO verify State to exists,
 			// TODO verify VAR1 exists
