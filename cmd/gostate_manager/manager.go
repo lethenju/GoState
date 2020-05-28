@@ -37,9 +37,9 @@ type stateMachine struct {
 }
 
 func getState(stateStr string, states *[]sm.State) *sm.State {
-	for _, state := range *states {
-		if stateStr == state.Name {
-			return &state
+	for i := 0; i < len(*states); i++ {
+		if stateStr == (*states)[i].Name {
+			return &(*states)[i]
 		}
 	}
 	return nil
@@ -107,7 +107,6 @@ func commandHandler(command []string, machine *stateMachine) (err error) {
 				return errors.New("Didnt find state " + command[3])
 
 			}
-			// Todo add transition  to the state command[2]
 			from.Connected = append(from.Connected, sm.Connection{ConnectionState: to,
 				ReasonToMove: func() bool {
 					return true
@@ -115,10 +114,6 @@ func commandHandler(command []string, machine *stateMachine) (err error) {
 				Transition: func() {
 					fmt.Println("[" + from.Name + "] -> [" + to.Name + "]")
 				}})
-			fmt.Println(&from)
-			fmt.Println(from)
-			fmt.Println(&to)
-			fmt.Println(to)
 
 			break
 		}
@@ -231,9 +226,6 @@ func commandHandler(command []string, machine *stateMachine) (err error) {
 		states := machine.States
 		for _, state := range states {
 			fmt.Println("State : " + state.Name)
-			fmt.Println(&state)
-			fmt.Println(state)
-
 			for _, transition := range state.Connected {
 				fmt.Println(" -> " + transition.ConnectionState.Name)
 			}
