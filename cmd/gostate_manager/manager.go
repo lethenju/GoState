@@ -37,6 +37,8 @@ type stateMachine struct {
 }
 
 func getState(stateStr string, states *[]sm.State) *sm.State {
+	// We cannot do a for range as we're looking for a reference.
+	// The range operation is copying objects and not references
 	for i := 0; i < len(*states); i++ {
 		if stateStr == (*states)[i].Name {
 			return &(*states)[i]
